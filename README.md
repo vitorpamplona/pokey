@@ -11,29 +11,12 @@ What is Nostr: https://www.nostr.how
 
 # Features
 
-- [x] Send public notes and replies
-- [x] Profile edition
-- [x] Reposts
-- [x] Reactions (likes & dislikes)
-- [x] Encrypted direct messsages
-- [x] NIP-05 validation
-- [x] Lightning Network invoice generation for profiles and notes
-- [x] Sensitive content flag
-- [x] Bech-32 keys
-- [x] Block users and content
-- [x] Groups
-- [x] Deep Links
-- [x] Search (content and hashtags)
-- [x] Mnemonic login
-- [x] Upload images to hosting services
-- [x] Push all data to a relay
-- [x] Global feed filters and blocked users
-- [x] Relay colouring
-- [x] Push events to private relay
-- [x] Zaps
-- [x] Bookmarks (public and private)
-- [x] Gossip model
-- [x] Authentication of clients to relays (NIP-42)
+- [ ] Finish POC
+- [ ] Connect to signer apps like Amber
+- [ ] Use built-in Tor engine
+- [ ] Multi-account
+- [ ] InBox Relays management
+- [ ] Granulated notification settings
 
 # Kudos
 
