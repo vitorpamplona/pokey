@@ -1,8 +1,9 @@
-Security Policy
-Supported Versions
+# Security Policy
+## Supported Versions
 
-Nostros does not support different versions. To keep up to date with security updates please use the latest version.
-Reporting a Vulnerability
+Pokey does not support different versions. To keep up to date with security updates please use the latest version.
+
+## Reporting a Vulnerability
 
 Please use this form to report an existing vulnetability https://github.com/KoalaSat/pokey/security/advisories
 
