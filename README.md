@@ -1,5 +1,5 @@
 [![release](https://img.shields.io/github/v/release/KoalaSat/pokey)](https://github.com/KoalaSat/nostros/pokey)
-[![Apache 2 license](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/KoalaSat/pokey/blob/main/LICENSE)
+[![MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/KoalaSat/pokey/blob/main/LICENSE)
 
 <div align="center">
     <img src="https://github.com/KoalaSat/pokey/blob/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="Description of Image" />
@@ -13,7 +13,7 @@ What is Nostr: https://www.nostr.how
 
 - [ ] Finish POC
 - [ ] Connect to signer apps like Amber
-- [ ] Broadcast to ther apps
+- [ ] Broadcast to other apps
 - [ ] Use built-in Tor engine
 - [ ] Multi-account
 - [ ] InBox Relays management
