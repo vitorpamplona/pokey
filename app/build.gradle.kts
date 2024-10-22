@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.koalasat.hiss"
+    namespace = "com.koalasat.pokey"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.koalasat.hiss"
+        applicationId = "com.koalasat.pokey"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Hiss</string>
+    <string name="app_name">Pokey</string>
     <string name="title_home">Home</string>
     <string name="title_relays">Relays</string>
     <string name="title_notifications">Notifications</string>
-    <string name="hiss_is_running_in_background">Hiss is running in background</string>
+    <string name="pokey_is_running_in_background">Pokey is running in background</string>
     <string name="relays_connection">Relays connection</string>
     <string name="notifications">Notifications</string>
     <string name="new_mention">New mention</string>
@@ -11,6 +11,7 @@
     <string name="unknown">Unknown</string>
     <string name="input_npub">Your nPub</string>
     <string name="invalid_npub">Invalid nPub</string>
+    <string name="permissions_required">The app requires permissions to work</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 </resources>

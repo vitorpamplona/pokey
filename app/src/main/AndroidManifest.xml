@@ -16,11 +16,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Hiss"
-        android:name=".Hiss"
+        android:theme="@style/Theme.Pokey"
+        android:name=".Pokey"
         tools:targetApi="31">
         <service
-            android:name=".service.ConnectivityService"
+            android:name=".service.NotificationsService"
             android:enabled="true"
             android:foregroundServiceType="specialUse"
             android:exported="false">

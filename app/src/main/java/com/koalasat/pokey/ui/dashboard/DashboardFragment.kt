@@ -1,4 +1,4 @@
-package com.koalasat.hiss.ui.dashboard
+package com.koalasat.pokey.ui.dashboard
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.koalasat.hiss.databinding.FragmentDashboardBinding
+import com.koalasat.pokey.databinding.FragmentDashboardBinding
 
 class DashboardFragment : Fragment() {
 

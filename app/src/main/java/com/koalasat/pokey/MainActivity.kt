@@ -1,9 +1,10 @@
-package com.koalasat.hiss
+package com.koalasat.pokey
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -12,10 +13,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.koalasat.hiss.databinding.ActivityMainBinding
+import com.koalasat.pokey.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    private val REQUEST_CODE_POST_NOTIFICATIONS: Int = 1
+    private val requestCodePostNotifications: Int = 1
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +47,24 @@ class MainActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                REQUEST_CODE_POST_NOTIFICATIONS
+                requestCodePostNotifications
             )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == requestCodePostNotifications) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+            } else {
+                // Permission denied, handle accordingly
+                Toast.makeText(applicationContext, getString(R.string.permissions_required), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
