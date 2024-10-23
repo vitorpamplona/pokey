@@ -1,5 +1,6 @@
 package com.koalasat.pokey.ui.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,7 @@ class HomeViewModel : ViewModel() {
     val npubInput: LiveData<String> get() = _npubInput
 
     private val _serviceStart = MutableLiveData<Boolean>().apply {
-        value = NotificationsService.isRunning
+        value = NotificationsService.isActive.value
     }
     val serviceStart: LiveData<Boolean> get() = _serviceStart
 
@@ -28,9 +29,9 @@ class HomeViewModel : ViewModel() {
 
     fun updateServiceStart(value: Boolean) {
         if (value) {
-            Pokey.getInstance().stopService()
-        } else {
             Pokey.getInstance().startService()
+        } else {
+            Pokey.getInstance().stopService()
         }
         _serviceStart.value = value
     }

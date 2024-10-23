@@ -1,21 +1,23 @@
 [versions]
 agp = "8.7.1"
-kotlin = "1.9.24"
-coreKtx = "1.10.1"
+kotlin = "2.0.20"
+coreKtx = "1.13.1"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-appcompat = "1.6.1"
-material = "1.10.0"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.0"
+material = "1.12.0"
 constraintlayout = "2.1.4"
-lifecycleLivedataKtx = "2.6.1"
-lifecycleViewmodelKtx = "2.6.1"
-navigationFragmentKtx = "2.6.0"
-navigationUiKtx = "2.6.0"
+lifecycleLivedataKtx = "2.8.6"
+lifecycleViewmodelKtx = "2.8.6"
+navigationFragmentKtx = "2.8.3"
+navigationUiKtx = "2.8.3"
 okhttp = "5.0.0-alpha.14"
 quartz = "0.92.7"
 jna = "5.14.0"
 securityCryptoKtx = "1.1.0-alpha06"
+roomKtx = "2.6.1"
+ksp = "2.0.20-1.0.24"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,8 +36,11 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 quartz = { module = "com.github.vitorpamplona.amethyst:quartz", version.ref = "quartz" }
 ammolite = { module = "com.github.vitorpamplona.amethyst:ammolite", version.ref = "quartz" }
 security-crypto-ktx = { module = "androidx.security:security-crypto-ktx", version.ref = "securityCryptoKtx" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomKtx" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin_ksp = { id = "com.google.devtools.ksp", version = "ksp" }
 

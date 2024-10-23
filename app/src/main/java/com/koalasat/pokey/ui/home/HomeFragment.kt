@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.koalasat.pokey.R
 import com.koalasat.pokey.databinding.FragmentHomeBinding
+import com.koalasat.pokey.service.NotificationsService
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -28,8 +29,6 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setButtonDisplay()
 
         viewModel.npubInput.observe(viewLifecycleOwner) { value ->
             if (binding.npubInput.text.toString() != value) {
@@ -49,15 +48,27 @@ class HomeFragment : Fragment() {
 
         binding.serviceStart.setOnClickListener {
             if (viewModel.serviceStart.value == true) {
-                setButtonDisplay()
                 viewModel.updateServiceStart(false)
             } else {
                 if (viewModel.validationResult.value == true) {
-                    setButtonDisplay()
                     viewModel.updateServiceStart(true)
                 } else {
                     binding.npubInput.error = getString(R.string.invalid_npub)
                 }
+            }
+        }
+
+        NotificationsService.isActive.observe(viewLifecycleOwner) {
+            if (it) {
+                val typedValue = TypedValue()
+                requireContext().theme.resolveAttribute(android.R.attr.colorButtonNormal, typedValue, true)
+                binding.serviceStart.setBackgroundColor(typedValue.data)
+                binding.serviceStart.text = getString(R.string.stop)
+            } else {
+                val typedValue = TypedValue()
+                requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
+                binding.serviceStart.setBackgroundColor(typedValue.data)
+                binding.serviceStart.text = getString(R.string.start)
             }
         }
     }
@@ -65,19 +76,5 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun setButtonDisplay() {
-        if (viewModel.serviceStart.value == true) {
-            val typedValue = TypedValue()
-            requireContext().theme.resolveAttribute(androidx.transition.R.attr.colorButtonNormal, typedValue, true)
-            binding.serviceStart.setBackgroundColor(typedValue.data)
-            binding.serviceStart.text = getString(R.string.stop)
-        } else {
-            val typedValue = TypedValue()
-            requireContext().theme.resolveAttribute(androidx.transition.R.attr.colorPrimary, typedValue, true)
-            binding.serviceStart.setBackgroundColor(typedValue.data)
-            binding.serviceStart.text = getString(R.string.start)
-        }
     }
 }
