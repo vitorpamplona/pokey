@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.R
 import com.koalasat.pokey.databinding.FragmentRelaysBinding
-import com.koalasat.pokey.service.NotificationsService
 import com.vitorpamplona.ammolite.relays.Relay
 import com.vitorpamplona.ammolite.relays.RelayPool
 
@@ -26,7 +25,7 @@ class RelaysFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val relaysViewModel =
             ViewModelProvider(this).get(RelaysViewModel::class.java)

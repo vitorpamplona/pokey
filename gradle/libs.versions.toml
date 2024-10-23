@@ -18,6 +18,7 @@ jna = "5.14.0"
 securityCryptoKtx = "1.1.0-alpha06"
 roomKtx = "2.6.1"
 ksp = "2.0.20-1.0.24"
+ktlint = "12.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,4 +44,5 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin_ksp = { id = "com.google.devtools.ksp", version = "ksp" }
-
+gradle_ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "ktlint" }
+jetbrainsComposeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

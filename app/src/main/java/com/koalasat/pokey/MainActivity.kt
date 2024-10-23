@@ -32,8 +32,10 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_relays, R.id.navigation_notifications
-            )
+                R.id.navigation_home,
+                R.id.navigation_relays,
+                R.id.navigation_notifications,
+            ),
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
@@ -41,13 +43,13 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(
                 this,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                requestCodePostNotifications
+                requestCodePostNotifications,
             )
         }
     }
@@ -55,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == requestCodePostNotifications) {
@@ -63,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 // Permission granted
             } else {
                 // Permission denied, handle accordingly
-                Toast.makeText(applicationContext, getString(R.string.permissions_required), Toast.LENGTH_SHORT).show();
+                Toast.makeText(applicationContext, getString(R.string.permissions_required), Toast.LENGTH_SHORT).show()
             }
         }
     }

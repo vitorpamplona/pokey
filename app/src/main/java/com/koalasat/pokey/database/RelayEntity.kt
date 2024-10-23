@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
         Index(
             value = ["url"],
             name = "relay_by_url",
-        )
+        ),
     ],
 )
 data class RelayEntity(
@@ -18,5 +18,5 @@ data class RelayEntity(
     val id: Int,
     val url: String,
     val kind: Int,
-    val createdAt: Long
+    val createdAt: Long,
 )

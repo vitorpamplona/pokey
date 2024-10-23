@@ -16,7 +16,6 @@ import com.vitorpamplona.ammolite.relays.RelaySetupInfo
     ],
     version = 5,
 )
-
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun applicationDao(): ApplicationDao
