@@ -176,6 +176,7 @@ class NotificationsService : Service() {
     override fun onDestroy() {
         timer.cancel()
         stopSubscription()
+        RelayPool.disconnect()
 
         try {
             val connectivityManager =
@@ -236,7 +237,6 @@ class NotificationsService : Service() {
 
     private fun stopSubscription() {
         Client.unsubscribe(clientListener)
-        RelayPool.disconnect()
     }
 
     private fun keepAlive() {
@@ -286,6 +286,7 @@ class NotificationsService : Service() {
             val lastCreatedRelayAt = dao.getLatestRelaysByKind(event.kind)
 
             if (lastCreatedRelayAt == null || lastCreatedRelayAt < event.createdAt) {
+                stopSubscription()
                 dao.deleteRelaysByKind(event.kind)
                 val relays = event.tags
                     .filter { it.size > 1 && (it[0] == "relay" || it[0] == "r") }
@@ -295,6 +296,7 @@ class NotificationsService : Service() {
                         entity
                     }
                 connectRelays(relays)
+                startSubscription()
             }
         }
     }
