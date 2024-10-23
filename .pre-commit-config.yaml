@@ -16,6 +16,7 @@ repos:
       - id: ktlint-check
         name: Run ktlintCheck
         entry: ./gradlew ktlintCheck
-        language: system  # Use the system's shell
-        types: [python]   # You can change this to match your project type
+        language: system
+        types: []  # This can be left empty if you want it to run for all file types
+        pass_filenames: false
 
