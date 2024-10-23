@@ -12,7 +12,7 @@ What is Nostr: https://www.nostr.how
 
 # Features
 
-- [ ] Finish POC
+- [x] Finish POC
 - [ ] Connect to signer apps like Amber
 - [ ] Broadcast to other apps
 - [ ] Auth to relays
