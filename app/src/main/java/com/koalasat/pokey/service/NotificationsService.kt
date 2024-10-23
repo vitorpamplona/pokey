@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -270,7 +271,7 @@ class NotificationsService : Service() {
 
             if (!event.hasVerifiedSignature()) return@launch
 
-            dao.insertNotification(NotificationEntity(0, event.id, event.kind, event.createdAt))
+            dao.insertNotification(NotificationEntity(0, event.id, event.createdAt))
 
             var title = getString(R.string.unknown)
             var text = ""
@@ -312,14 +313,5 @@ class NotificationsService : Service() {
             }
         }
         return hexKey
-    }
-
-    companion object {
-        private val _isActive = MutableLiveData(false)
-        val isActive: LiveData<Boolean> get() = _isActive
-
-        fun setRunningState(running: Boolean) {
-            _isActive.value = running
-        }
     }
 }

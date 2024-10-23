@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.R
 import com.koalasat.pokey.databinding.FragmentHomeBinding
 import com.koalasat.pokey.service.NotificationsService
@@ -58,7 +59,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        NotificationsService.isActive.observe(viewLifecycleOwner) {
+        Pokey.isEnabled.observe(viewLifecycleOwner) {
             if (it) {
                 val typedValue = TypedValue()
                 requireContext().theme.resolveAttribute(android.R.attr.colorButtonNormal, typedValue, true)

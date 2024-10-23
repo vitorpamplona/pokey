@@ -17,6 +17,5 @@ data class NotificationEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int,
     val eventId: String,
-    val kind: Int,
     val time: Long,
 )

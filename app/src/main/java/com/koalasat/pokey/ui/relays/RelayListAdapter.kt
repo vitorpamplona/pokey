@@ -7,7 +7,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.koalasat.pokey.R
-import com.koalasat.pokey.service.NotificationsService
 import com.vitorpamplona.ammolite.relays.Relay
 
 class RelayListAdapter(private val items: List<Relay>) : RecyclerView.Adapter<RelayListAdapter.ViewHolder>() {
@@ -17,7 +16,7 @@ class RelayListAdapter(private val items: List<Relay>) : RecyclerView.Adapter<Re
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_relay_list, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.fragment_relay_item, parent, false)
         return ViewHolder(view)
     }
 

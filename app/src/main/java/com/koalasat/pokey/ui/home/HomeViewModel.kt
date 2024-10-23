@@ -18,7 +18,7 @@ class HomeViewModel : ViewModel() {
     val npubInput: LiveData<String> get() = _npubInput
 
     private val _serviceStart = MutableLiveData<Boolean>().apply {
-        value = NotificationsService.isActive.value
+        value = Pokey.isEnabled.value
     }
     val serviceStart: LiveData<Boolean> get() = _serviceStart
 

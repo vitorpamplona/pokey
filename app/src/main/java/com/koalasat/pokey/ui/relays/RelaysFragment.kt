@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.R
 import com.koalasat.pokey.databinding.FragmentRelaysBinding
 import com.koalasat.pokey.service.NotificationsService
@@ -39,7 +40,7 @@ class RelaysFragment : Fragment() {
             textView.text = it
         }
 
-        NotificationsService.isActive.observe(viewLifecycleOwner) {
+        Pokey.isEnabled.observe(viewLifecycleOwner) {
             textView.text = if (it) {
                 getString(R.string.relays)
             } else {
