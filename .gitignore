@@ -15,11 +15,7 @@
 .cxx
 .kotlin/
 keystore.properties
-/free/
-/offline/
-app/free/release/
-app/play/release/
-app/offline/release/
+app/release/
 
 # Built application files
 *.apk
