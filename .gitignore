@@ -16,6 +16,7 @@
 .kotlin/
 keystore.properties
 app/release/
+*.keystore
 
 # Built application files
 *.apk
