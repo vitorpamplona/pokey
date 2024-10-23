@@ -1,13 +1,11 @@
 package com.koalasat.pokey.ui.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.models.EncryptedStorage.preferences
 import com.koalasat.pokey.models.PrefKeys
-import com.koalasat.pokey.service.NotificationsService
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
 

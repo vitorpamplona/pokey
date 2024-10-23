@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
         Index(
             value = ["eventId"],
             name = "notification_by_eventId",
-        )
+        ),
     ],
 )
 data class NotificationEntity(

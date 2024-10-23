@@ -20,7 +20,7 @@ class NotificationsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val notificationsViewModel =
             ViewModelProvider(this).get(NotificationsViewModel::class.java)

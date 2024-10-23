@@ -22,10 +22,11 @@ class RelayListAdapter(private val items: List<Relay>) : RecyclerView.Adapter<Re
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.textView.text = items[position].url
-        val color = if (items[position].isConnected())
+        val color = if (items[position].isConnected()) {
             R.color.green
-        else
+        } else {
             R.color.red
+        }
         holder.textView.setTextColor(ContextCompat.getColorStateList(holder.textView.context, color))
     }
 

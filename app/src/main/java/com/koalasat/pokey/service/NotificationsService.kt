@@ -31,14 +31,14 @@ import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
 import com.vitorpamplona.quartz.events.Event
 import com.vitorpamplona.quartz.events.EventInterface
+import java.time.Instant
+import java.util.Timer
+import java.util.TimerTask
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.util.Timer
-import java.util.TimerTask
 
 class NotificationsService : Service() {
     private var channelRelaysId = "RelaysConnections"
@@ -48,7 +48,12 @@ class NotificationsService : Service() {
     private var subscriptionInboxId = "inboxRelays"
 
     private var defaultRelayUrls = listOf(
-        "wss://relay.damus.io", "wss://offchain.pub", "wss://relay.snort.social", "wss://nos.lol", "wss://relay.nsec.app", "wss://relay.0xchat.com"
+        "wss://relay.damus.io",
+        "wss://offchain.pub",
+        "wss://relay.snort.social",
+        "wss://nos.lol",
+        "wss://relay.nsec.app",
+        "wss://relay.0xchat.com",
     )
     private var useDefaultRelays = false
 
@@ -99,7 +104,7 @@ class NotificationsService : Service() {
                 eventId: String,
                 success: Boolean,
                 message: String,
-                relay: Relay
+                relay: Relay,
             ) {
                 Log.d("Pokey", "Relay send response: ${relay.url} - $eventId")
             }
@@ -171,6 +176,7 @@ class NotificationsService : Service() {
     override fun onDestroy() {
         timer.cancel()
         stopSubscription()
+        RelayPool.disconnect()
 
         try {
             val connectivityManager =
@@ -195,36 +201,42 @@ class NotificationsService : Service() {
             if (latestNotification == null) latestNotification = Instant.now().toEpochMilli() / 1000
 
             var relays = dao.getRelays()
-            if (relays.isEmpty()){
-                relays = defaultRelayUrls.map { RelayEntity(id=0, url = it, kind = 0, createdAt = 0) }
+            if (relays.isEmpty()) {
+                relays = defaultRelayUrls.map { RelayEntity(id = 0, url = it, kind = 0, createdAt = 0) }
                 useDefaultRelays = true
             }
             connectRelays(relays)
 
-            Client.sendFilter(subscriptionNotificationId, listOf(TypedFilter(
-                types = COMMON_FEED_TYPES,
-                filter = SincePerRelayFilter(
-                    kinds = listOf(1),
-                    tags = mapOf("p" to listOf(hexKey)),
-                    since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) }
+            Client.sendFilter(
+                subscriptionNotificationId,
+                listOf(
+                    TypedFilter(
+                        types = COMMON_FEED_TYPES,
+                        filter = SincePerRelayFilter(
+                            kinds = listOf(1),
+                            tags = mapOf("p" to listOf(hexKey)),
+                            since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
+                        ),
+                    ),
                 ),
-            )))
+            )
             Client.sendFilter(
                 subscriptionInboxId,
-                listOf(TypedFilter(
-                    types = EVENT_FINDER_TYPES,
-                    filter = SincePerRelayFilter(
-                        kinds = listOf(10050, 10002),
-                        authors = listOf(hexKey)
+                listOf(
+                    TypedFilter(
+                        types = EVENT_FINDER_TYPES,
+                        filter = SincePerRelayFilter(
+                            kinds = listOf(10050, 10002),
+                            authors = listOf(hexKey),
+                        ),
                     ),
-                ))
+                ),
             )
         }
     }
 
     private fun stopSubscription() {
         Client.unsubscribe(clientListener)
-        RelayPool.disconnect()
     }
 
     private fun keepAlive() {
@@ -273,16 +285,18 @@ class NotificationsService : Service() {
             val dao = AppDatabase.getDatabase(this@NotificationsService, getHexKey()).applicationDao()
             val lastCreatedRelayAt = dao.getLatestRelaysByKind(event.kind)
 
-            if (lastCreatedRelayAt == null || lastCreatedRelayAt < event.createdAt ) {
+            if (lastCreatedRelayAt == null || lastCreatedRelayAt < event.createdAt) {
+                stopSubscription()
                 dao.deleteRelaysByKind(event.kind)
                 val relays = event.tags
                     .filter { it.size > 1 && (it[0] == "relay" || it[0] == "r") }
                     .map {
-                        val entity = RelayEntity(id = 0, url =it[1], kind = event.kind, createdAt = event.createdAt)
+                        val entity = RelayEntity(id = 0, url = it[1], kind = event.kind, createdAt = event.createdAt)
                         dao.insertRelay(entity)
                         entity
                     }
                 connectRelays(relays)
+                startSubscription()
             }
         }
     }
@@ -305,14 +319,15 @@ class NotificationsService : Service() {
             val pubKey = preferences().getString(PrefKeys.NOSTR_PUBKEY, "")
 
             if (event.kind == 1) {
-                title = if (event.content().contains("nostr:${pubKey}"))
+                title = if (event.content().contains("nostr:$pubKey")) {
                     getString(R.string.new_mention)
-                else if (event.content().contains("nostr:nevent1"))
+                } else if (event.content().contains("nostr:nevent1")) {
                     getString(R.string.new_repost)
-                else
+                } else {
                     getString(R.string.new_reply)
+                }
                 text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
-            } else if (event.kind == 4 || event.kind == 13){
+            } else if (event.kind == 4 || event.kind == 13) {
                 title = getString(R.string.new_private)
             } else if (event.kind == 9735) {
                 title = getString(R.string.new_zap)
@@ -331,7 +346,7 @@ class NotificationsService : Service() {
             val nProfile = Nip19Bech32.parseComponents(
                 "npub",
                 event.pubKey,
-                null
+                null,
             )
             if (nProfile != null) {
                 data = Uri.parse("nostr:${nProfile.nip19raw}")
@@ -341,7 +356,7 @@ class NotificationsService : Service() {
             this@NotificationsService,
             0,
             deepLinkIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         val notificationManager =
@@ -349,7 +364,7 @@ class NotificationsService : Service() {
         val builder: NotificationCompat.Builder =
             NotificationCompat.Builder(
                 applicationContext,
-                channelNotificationsId
+                channelNotificationsId,
             )
                 .setContentTitle(title)
                 .setContentText(text)
@@ -363,7 +378,7 @@ class NotificationsService : Service() {
 
     private fun getHexKey(): String {
         val pubKey = preferences().getString(PrefKeys.NOSTR_PUBKEY, "").toString()
-        var hexKey = "";
+        var hexKey = ""
         val parseReturn = uriToRoute(pubKey)
         when (val parsed = parseReturn?.entity) {
             is Nip19Bech32.NPub -> {
@@ -388,7 +403,7 @@ class NotificationsService : Service() {
                         read = true,
                         write = false,
                         forceProxy = false,
-                        activeTypes = COMMON_FEED_TYPES
+                        activeTypes = COMMON_FEED_TYPES,
                     ),
                 )
             }
