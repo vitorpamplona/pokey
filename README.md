@@ -15,6 +15,7 @@ What is Nostr: https://www.nostr.how
 - [ ] Finish POC
 - [ ] Connect to signer apps like Amber
 - [ ] Broadcast to other apps
+- [ ] Auth to relays
 - [ ] Use built-in Tor engine
 - [ ] Multi-account
 - [ ] InBox Relays management

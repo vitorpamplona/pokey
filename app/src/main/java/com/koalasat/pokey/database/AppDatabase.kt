@@ -11,7 +11,8 @@ import com.vitorpamplona.ammolite.relays.RelaySetupInfo
 
 @Database(
     entities = [
-        NotificationEntity::class
+        NotificationEntity::class,
+        RelayEntity::class,
     ],
     version = 5,
 )

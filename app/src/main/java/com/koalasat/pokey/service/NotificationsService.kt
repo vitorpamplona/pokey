@@ -2,33 +2,31 @@ package com.koalasat.pokey.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.koalasat.pokey.Connectivity
-import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.R
 import com.koalasat.pokey.database.AppDatabase
 import com.koalasat.pokey.database.NotificationEntity
+import com.koalasat.pokey.database.RelayEntity
 import com.koalasat.pokey.models.EncryptedStorage.preferences
 import com.koalasat.pokey.models.PrefKeys
 import com.vitorpamplona.ammolite.relays.COMMON_FEED_TYPES
 import com.vitorpamplona.ammolite.relays.Client
+import com.vitorpamplona.ammolite.relays.EVENT_FINDER_TYPES
 import com.vitorpamplona.ammolite.relays.Relay
 import com.vitorpamplona.ammolite.relays.RelayPool
 import com.vitorpamplona.ammolite.relays.TypedFilter
 import com.vitorpamplona.ammolite.relays.filters.EOSETime
 import com.vitorpamplona.ammolite.relays.filters.SincePerRelayFilter
-import com.vitorpamplona.ammolite.service.HttpClientManager
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
 import com.vitorpamplona.quartz.events.Event
@@ -46,9 +44,13 @@ class NotificationsService : Service() {
     private var channelRelaysId = "RelaysConnections"
     private var channelNotificationsId = "Notifications"
 
-    private var defaultRelayUrls = arrayOf(
-        "wss://relay.damus.io", "wss://offchain.pub", "wss://relay.snort.social", "wss://nos.lol", "wss://nostr.wine"
+    private var subscriptionNotificationId = "subscriptionNotificationId"
+    private var subscriptionInboxId = "inboxRelays"
+
+    private var defaultRelayUrls = listOf(
+        "wss://relay.damus.io", "wss://offchain.pub", "wss://relay.snort.social", "wss://nos.lol", "wss://relay.nsec.app", "wss://relay.0xchat.com"
     )
+    private var useDefaultRelays = false
 
     private val timer = Timer()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -60,11 +62,11 @@ class NotificationsService : Service() {
             }
 
             override fun onSend(relay: Relay, msg: String, success: Boolean) {
-                Log.d("Pokey", "Relay send: ${relay.url}")
+                Log.d("Pokey", "Relay send: ${relay.url} - $msg - Success $success")
             }
 
             override fun onBeforeSend(relay: Relay, event: EventInterface) {
-                Log.d("Pokey", "Relay Before Send: ${relay.url} - $event")
+                Log.d("Pokey", "Relay Before Send: ${relay.url} - ${event.toJson()}")
             }
 
             override fun onError(error: Error, subscriptionId: String, relay: Relay) {
@@ -77,9 +79,12 @@ class NotificationsService : Service() {
                 relay: Relay,
                 afterEOSE: Boolean,
             ) {
-                Log.d("Pokey", "Relay Event: ${relay.url} - ${event.id}")
-
-                displayNoteNotification(event)
+                Log.d("Pokey", "Relay Event: ${relay.url} - $subscriptionId - ${event.toJson()}")
+                if (subscriptionId == subscriptionNotificationId) {
+                    createNoteNotification(event)
+                } else if (subscriptionId == subscriptionInboxId) {
+                    manageInboxRelays(event)
+                }
             }
 
             override fun onNotify(relay: Relay, description: String) {
@@ -182,28 +187,21 @@ class NotificationsService : Service() {
         val hexKey = getHexKey()
         if (hexKey.isEmpty()) return
 
-        if (!Client.isSubscribed(clientListener)) Client.subscribe(clientListener)
-
-        defaultRelayUrls.forEach {
-            if (RelayPool.getRelays(it).isEmpty()) {
-                RelayPool.addRelay(
-                    Relay(
-                        it,
-                        read = true,
-                        write = false,
-                        forceProxy = false,
-                        activeTypes = COMMON_FEED_TYPES
-                    ),
-                )
-            }
-        }
-
         CoroutineScope(Dispatchers.IO).launch {
+            if (!Client.isSubscribed(clientListener)) Client.subscribe(clientListener)
+
             val dao = AppDatabase.getDatabase(this@NotificationsService, getHexKey()).applicationDao()
             var latestNotification = dao.getLatestNotification()
             if (latestNotification == null) latestNotification = Instant.now().toEpochMilli() / 1000
 
-            Client.sendFilter("pushNotifications", listOf(TypedFilter(
+            var relays = dao.getRelays()
+            if (relays.isEmpty()){
+                relays = defaultRelayUrls.map { RelayEntity(id=0, url = it, kind = 0, createdAt = 0) }
+                useDefaultRelays = true
+            }
+            connectRelays(relays)
+
+            Client.sendFilter(subscriptionNotificationId, listOf(TypedFilter(
                 types = COMMON_FEED_TYPES,
                 filter = SincePerRelayFilter(
                     kinds = listOf(1),
@@ -211,6 +209,16 @@ class NotificationsService : Service() {
                     since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) }
                 ),
             )))
+            Client.sendFilter(
+                subscriptionInboxId,
+                listOf(TypedFilter(
+                    types = EVENT_FINDER_TYPES,
+                    filter = SincePerRelayFilter(
+                        kinds = listOf(10050, 10002),
+                        authors = listOf(hexKey)
+                    ),
+                ))
+            )
         }
     }
 
@@ -245,7 +253,7 @@ class NotificationsService : Service() {
         channelRelays.setSound(null, null)
 
         val channelNotification = NotificationChannel(channelNotificationsId, getString(R.string.notifications), NotificationManager.IMPORTANCE_HIGH)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         notificationManager.createNotificationChannel(channelRelays)
         notificationManager.createNotificationChannel(channelNotification)
@@ -260,9 +268,28 @@ class NotificationsService : Service() {
         return notificationBuilder.build()
     }
 
-    private fun displayNoteNotification(event: Event) {
-        val pubKey = getHexKey()
-        if (event.pubKey == pubKey) return
+    private fun manageInboxRelays(event: Event) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val dao = AppDatabase.getDatabase(this@NotificationsService, getHexKey()).applicationDao()
+            val lastCreatedRelayAt = dao.getLatestRelaysByKind(event.kind)
+
+            if (lastCreatedRelayAt == null || lastCreatedRelayAt < event.createdAt ) {
+                dao.deleteRelaysByKind(event.kind)
+                val relays = event.tags
+                    .filter { it.size > 1 && (it[0] == "relay" || it[0] == "r") }
+                    .map {
+                        val entity = RelayEntity(id = 0, url =it[1], kind = event.kind, createdAt = event.createdAt)
+                        dao.insertRelay(entity)
+                        entity
+                    }
+                connectRelays(relays)
+            }
+        }
+    }
+
+    private fun createNoteNotification(event: Event) {
+        val hexKey = getHexKey()
+        if (event.pubKey == hexKey || !event.taggedUsers().contains(hexKey)) return
 
         CoroutineScope(Dispatchers.IO).launch {
             val dao = AppDatabase.getDatabase(this@NotificationsService, getHexKey()).applicationDao()
@@ -273,8 +300,9 @@ class NotificationsService : Service() {
 
             dao.insertNotification(NotificationEntity(0, event.id, event.createdAt))
 
-            var title = getString(R.string.unknown)
+            var title = ""
             var text = ""
+            val pubKey = preferences().getString(PrefKeys.NOSTR_PUBKEY, "")
 
             if (event.kind == 1) {
                 title = if (event.content().contains("nostr:${pubKey}"))
@@ -284,23 +312,53 @@ class NotificationsService : Service() {
                 else
                     getString(R.string.new_reply)
                 text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
+            } else if (event.kind == 4 || event.kind == 13){
+                title = getString(R.string.new_private)
+            } else if (event.kind == 9735) {
+                title = getString(R.string.new_zap)
+            } else if (event.kind == 3) {
+                title = getString(R.string.new_follow)
             }
 
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val builder: NotificationCompat.Builder =
-                NotificationCompat.Builder(
-                    applicationContext,
-                    channelNotificationsId
-                )
-                    .setContentTitle(title)
-                    .setContentText(text)
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setAutoCancel(true)
+            if (title.isEmpty()) return@launch
 
-            notificationManager.notify(event.hashCode(), builder.build())
+            displayNoteNotification(title, text, event)
         }
+    }
+
+    private fun displayNoteNotification(title: String, text: String, event: Event) {
+        val deepLinkIntent = Intent(Intent.ACTION_VIEW).apply {
+            val nProfile = Nip19Bech32.parseComponents(
+                "npub",
+                event.pubKey,
+                null
+            )
+            if (nProfile != null) {
+                data = Uri.parse("nostr:${nProfile.nip19raw}")
+            }
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this@NotificationsService,
+            0,
+            deepLinkIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notificationManager =
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val builder: NotificationCompat.Builder =
+            NotificationCompat.Builder(
+                applicationContext,
+                channelNotificationsId
+            )
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+
+        notificationManager.notify(event.hashCode(), builder.build())
     }
 
     private fun getHexKey(): String {
@@ -313,5 +371,27 @@ class NotificationsService : Service() {
             }
         }
         return hexKey
+    }
+
+    private fun connectRelays(relays: List<RelayEntity>) {
+        Log.d("Pokey", relays.toString())
+        if (useDefaultRelays) {
+            RelayPool.unloadRelays()
+            useDefaultRelays = false
+        }
+        relays.forEach {
+            if (RelayPool.getRelays(it.url).isEmpty()) {
+                Client.sendFilterOnlyIfDisconnected()
+                RelayPool.addRelay(
+                    Relay(
+                        it.url,
+                        read = true,
+                        write = false,
+                        forceProxy = false,
+                        activeTypes = COMMON_FEED_TYPES
+                    ),
+                )
+            }
+        }
     }
 }
