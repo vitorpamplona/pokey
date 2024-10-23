@@ -136,6 +136,7 @@ dependencies {
     implementation(libs.jna) { artifact { type = "aar" } }
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.compiler)
 
     testImplementation(libs.junit)
 
