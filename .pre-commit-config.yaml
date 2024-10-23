@@ -9,12 +9,13 @@ repos:
         args:
           - '--fix=lf'
       - id: trailing-whitespace
-      - id: pretty-format-json
-        exclude: ^frontend/|^mobile/
-        args:
-          - '--autofix'
-          - '--no-sort-keys'
-          - '--no-ensure-ascii'
       - id: check-builtin-literals
       - id: check-docstring-first
+  - repo: local
+    hooks:
+      - id: ktlint-check
+        name: Run ktlintCheck
+        entry: ./gradlew ktlintCheck
+        language: system  # Use the system's shell
+        types: [python]   # You can change this to match your project type
 
