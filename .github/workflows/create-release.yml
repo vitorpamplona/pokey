@@ -29,24 +29,17 @@ jobs:
       - name: Build APK
         run: ./gradlew assembleRelease --stacktrace
 
-      - name: Decode keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > pokey.keystore
-
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
-          release: true
-          keystore: pokey.keystore
           releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           # override default build-tools version (29.0.3) -- optional
           BUILD_TOOLS_VERSION: "34.0.0"
-      
-      - name: Clean up keystore
-        run: rm pokey.keystore
 
       - uses: kaisugi/action-regex-match@v1.0.1
         id: regex-match
