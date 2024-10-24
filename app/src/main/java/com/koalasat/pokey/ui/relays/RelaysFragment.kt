@@ -35,15 +35,11 @@ class RelaysFragment : Fragment() {
         val root: View = binding.root
 
         val textView: TextView = binding.titleRelays
-        relaysViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
-
         Pokey.isEnabled.observe(viewLifecycleOwner) {
-            textView.text = if (it) {
-                getString(R.string.relays)
+            if (it) {
+                textView.visibility = View.GONE
             } else {
-                getString(R.string.not_started)
+                textView.visibility = View.VISIBLE
             }
         }
 

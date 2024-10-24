@@ -47,6 +47,7 @@ class NotificationsService : Service() {
     private var subscriptionNotificationId = "subscriptionNotificationId"
     private var subscriptionInboxId = "inboxRelays"
 
+    private var receivedEventsCache = mutableSetOf<String>()
     private var defaultRelayUrls = listOf(
         "wss://relay.damus.io",
         "wss://offchain.pub",
@@ -84,11 +85,11 @@ class NotificationsService : Service() {
                 relay: Relay,
                 afterEOSE: Boolean,
             ) {
+                if (receivedEventsCache.contains(event.id)) return
                 Log.d("Pokey", "Relay Event: ${relay.url} - $subscriptionId - ${event.toJson()}")
+                receivedEventsCache.add(event.id)
                 if (subscriptionId == subscriptionNotificationId) {
                     createNoteNotification(event)
-                } else if (subscriptionId == subscriptionInboxId) {
-                    manageInboxRelays(event)
                 }
             }
 
@@ -213,24 +214,38 @@ class NotificationsService : Service() {
                     TypedFilter(
                         types = COMMON_FEED_TYPES,
                         filter = SincePerRelayFilter(
-                            kinds = listOf(1),
+                            kinds = listOf(1, 4, 13, 9735),
                             tags = mapOf("p" to listOf(hexKey)),
                             since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
                         ),
                     ),
                 ),
             )
-            Client.sendFilter(
+            Client.sendFilterAndStopOnFirstResponse(
                 subscriptionInboxId,
                 listOf(
                     TypedFilter(
                         types = EVENT_FINDER_TYPES,
                         filter = SincePerRelayFilter(
-                            kinds = listOf(10050, 10002),
+                            kinds = listOf(10002),
                             authors = listOf(hexKey),
                         ),
                     ),
                 ),
+                onResponse = { manageInboxRelays(it) },
+            )
+            Client.sendFilterAndStopOnFirstResponse(
+                subscriptionInboxId,
+                listOf(
+                    TypedFilter(
+                        types = EVENT_FINDER_TYPES,
+                        filter = SincePerRelayFilter(
+                            kinds = listOf(10050),
+                            authors = listOf(hexKey),
+                        ),
+                    ),
+                ),
+                onResponse = { manageInboxRelays(it) },
             )
         }
     }
@@ -243,6 +258,7 @@ class NotificationsService : Service() {
         timer.schedule(
             object : TimerTask() {
                 override fun run() {
+                    receivedEventsCache.clear()
                     RelayPool.getAll().forEach {
                         if (!it.isConnected()) {
                             Log.d(
@@ -331,8 +347,6 @@ class NotificationsService : Service() {
                 title = getString(R.string.new_private)
             } else if (event.kind == 9735) {
                 title = getString(R.string.new_zap)
-            } else if (event.kind == 3) {
-                title = getString(R.string.new_follow)
             }
 
             if (title.isEmpty()) return@launch
