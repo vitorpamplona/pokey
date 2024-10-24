@@ -76,7 +76,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Get Zap.Store latest release
-        id: publish-zap-store
+        id: get-zap-store-release
         run: |
           LATEST_RELEASE=$(curl -s https://api.github.com/repos/zapstore/zapstore-cli/releases/latest)
           TAG_NAME=$(echo $LATEST_RELEASE | jq -r .tag_name)
