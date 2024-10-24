@@ -45,6 +45,7 @@ class NotificationsService : Service() {
 
     private var subscriptionNotificationId = "subscriptionNotificationId"
     private var subscriptionInboxId = "inboxRelays"
+    private var subscriptionReadId = "readRelays"
 
     private var receivedEventsCache = mutableSetOf<String>()
     private var defaultRelayUrls = listOf(
@@ -214,7 +215,7 @@ class NotificationsService : Service() {
                 ),
             )
             Client.sendFilterAndStopOnFirstResponse(
-                subscriptionInboxId,
+                subscriptionReadId,
                 listOf(
                     TypedFilter(
                         types = EVENT_FINDER_TYPES,
