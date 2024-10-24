@@ -29,14 +29,8 @@ jobs:
       - name: Install Build tools
         run: sdkmanager "build-tools:34.0.0"
 
-        run: |
-          wget "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool"
-          wget "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.4.1.jar"
-          mv apktool_2.4.1.jar apktool.jar
-          sudo cp apktool /usr/local/bin
-          sudo cp apktool.jar /usr/local/bin
-          sudo chmod +x /usr/local/bin/apktool
-          sudo chmod +x /usr/local/bin/apktool.jar
+      - name: Verify apksigner
+        run: $ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner --version
 
       - name: Install Apktool
         run: |
