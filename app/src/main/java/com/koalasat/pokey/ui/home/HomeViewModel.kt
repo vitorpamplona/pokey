@@ -4,26 +4,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.koalasat.pokey.Pokey
-import com.koalasat.pokey.models.EncryptedStorage.preferences
-import com.koalasat.pokey.models.PrefKeys
+import com.koalasat.pokey.models.EncryptedStorage
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
 
 class HomeViewModel : ViewModel() {
-    private val _npubInput = MutableLiveData<String>().apply {
-        value = preferences().getString(PrefKeys.NOSTR_PUBKEY, "").toString()
-    }
+    private val _npubInput = MutableLiveData<String>()
     val npubInput: LiveData<String> get() = _npubInput
 
-    private val _serviceStart = MutableLiveData<Boolean>().apply {
-        value = Pokey.isEnabled.value
-    }
+    private val _serviceStart = MutableLiveData<Boolean>()
     val serviceStart: LiveData<Boolean> get() = _serviceStart
 
-    private val _validationResult = MutableLiveData<Boolean>().apply {
-        value = preferences().getString(PrefKeys.NOSTR_PUBKEY, "")?.isNotEmpty()
-    }
+    private val _validationResult = MutableLiveData<Boolean>()
     val validationResult: LiveData<Boolean> get() = _validationResult
+
+    init {
+        _npubInput.value = EncryptedStorage.pubKey.value
+        _serviceStart.value = Pokey.isEnabled.value
+        _validationResult.value = EncryptedStorage.pubKey.value?.isNotEmpty()
+        EncryptedStorage.pubKey.observeForever { text ->
+            _npubInput.value = text
+        }
+    }
 
     fun updateServiceStart(value: Boolean) {
         if (value) {
@@ -38,9 +40,7 @@ class HomeViewModel : ViewModel() {
         _npubInput.value = text
         validateNpubInput()
         if (_validationResult.value == true) {
-            preferences().edit().apply {
-                putString(PrefKeys.NOSTR_PUBKEY, text)
-            }.apply()
+            EncryptedStorage.updatePubKey(text)
         }
     }
 

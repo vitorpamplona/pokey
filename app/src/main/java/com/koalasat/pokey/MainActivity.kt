@@ -1,10 +1,13 @@
 package com.koalasat.pokey
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -14,6 +17,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.koalasat.pokey.databinding.ActivityMainBinding
+import com.koalasat.pokey.models.EncryptedStorage
+import com.vitorpamplona.quartz.signers.ExternalSignerLauncher
+import com.vitorpamplona.quartz.signers.SignerType
+import java.util.UUID
+import kotlin.coroutines.cancellation.CancellationException
 
 class MainActivity : AppCompatActivity() {
     private val requestCodePostNotifications: Int = 1
@@ -21,6 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        EncryptedStorage.init(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -52,6 +62,8 @@ class MainActivity : AppCompatActivity() {
                 requestCodePostNotifications,
             )
         }
+
+        if (EncryptedStorage.pubKey.value.isNullOrEmpty()) connectExternalSigner()
     }
 
     override fun onRequestPermissionsResult(
@@ -64,9 +76,42 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission granted
             } else {
-                // Permission denied, handle accordingly
                 Toast.makeText(applicationContext, getString(R.string.permissions_required), Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun connectExternalSigner() {
+        val id = UUID.randomUUID().toString()
+        val externalSignerLauncher = ExternalSignerLauncher("", signerPackageName = "")
+
+        val nostrSignerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) {
+                Log.e("Pokey", "ExternalSigner result error: ${result.resultCode}")
+            } else {
+                result.data?.let { externalSignerLauncher.newResult(it) }
+            }
+        }
+        externalSignerLauncher.registerLauncher(
+            launcher = {
+                try {
+                    nostrSignerLauncher.launch(it) // This can remain if you still need to launch it
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.e("Pokey", "Error opening Signer app", e)
+                }
+            },
+            contentResolver = { Pokey.getInstance().contentResolverFn() },
+        )
+        externalSignerLauncher.openSignerApp(
+            "",
+            SignerType.GET_PUBLIC_KEY,
+            "",
+            id,
+        ) { result ->
+            val split = result.split("-")
+            val pubkey = split.first()
+            if (split.first().isNotEmpty()) EncryptedStorage.updatePubKey(pubkey)
         }
     }
 }

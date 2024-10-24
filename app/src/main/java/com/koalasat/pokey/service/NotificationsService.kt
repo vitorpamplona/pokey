@@ -17,8 +17,7 @@ import com.koalasat.pokey.R
 import com.koalasat.pokey.database.AppDatabase
 import com.koalasat.pokey.database.NotificationEntity
 import com.koalasat.pokey.database.RelayEntity
-import com.koalasat.pokey.models.EncryptedStorage.preferences
-import com.koalasat.pokey.models.PrefKeys
+import com.koalasat.pokey.models.EncryptedStorage
 import com.vitorpamplona.ammolite.relays.COMMON_FEED_TYPES
 import com.vitorpamplona.ammolite.relays.Client
 import com.vitorpamplona.ammolite.relays.EVENT_FINDER_TYPES
@@ -332,7 +331,7 @@ class NotificationsService : Service() {
 
             var title = ""
             var text = ""
-            val pubKey = preferences().getString(PrefKeys.NOSTR_PUBKEY, "")
+            val pubKey = EncryptedStorage.pubKey
 
             if (event.kind == 1) {
                 title = if (event.content().contains("nostr:$pubKey")) {
@@ -366,16 +365,16 @@ class NotificationsService : Service() {
 
     private fun displayNoteNotification(title: String, text: String, event: Event) {
         val deepLinkIntent = Intent(Intent.ACTION_VIEW).apply {
-            val nPub = Nip19Bech32.parseComponents(
-                "npub",
-                event.pubKey,
-                null,
-            )
+//            val nPub = Nip19Bech32.parseComponents(
+//                "npub",
+//                event.pubKey,
+//                null,
+//            )
 
-            if (nPub != null) {
-                Log.d("Pokey", "nostr:${nPub.nip19raw}")
-                data = Uri.parse("nostr:${nPub.nip19raw}")
-            }
+//            if (nPub != null) {
+//                data = Uri.parse("nostr:${nPub.nip19raw}")
+//            }
+            data = Uri.parse("nostr:")
         }
         val pendingIntent = PendingIntent.getActivity(
             this@NotificationsService,
@@ -402,7 +401,7 @@ class NotificationsService : Service() {
     }
 
     private fun getHexKey(): String {
-        val pubKey = preferences().getString(PrefKeys.NOSTR_PUBKEY, "").toString()
+        val pubKey = EncryptedStorage.pubKey.value
         var hexKey = ""
         val parseReturn = uriToRoute(pubKey)
         when (val parsed = parseReturn?.entity) {
