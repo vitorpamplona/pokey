@@ -91,6 +91,8 @@ jobs:
 
       - name: Publish to Zap.Store
         id: publish-zap-store
+        env:
+          NSEC: ${{ secrets.POKEY_NSEC }}
         run: |
           git clone https://github.com/zapstore/zapstore-cli.git
           cd zapstore-cli

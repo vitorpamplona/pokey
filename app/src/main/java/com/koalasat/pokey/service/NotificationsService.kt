@@ -357,13 +357,15 @@ class NotificationsService : Service() {
 
     private fun displayNoteNotification(title: String, text: String, event: Event) {
         val deepLinkIntent = Intent(Intent.ACTION_VIEW).apply {
-            val nProfile = Nip19Bech32.parseComponents(
+            val nPub = Nip19Bech32.parseComponents(
                 "npub",
                 event.pubKey,
                 null,
             )
-            if (nProfile != null) {
-                data = Uri.parse("nostr:${nProfile.nip19raw}")
+
+            if (nPub != null) {
+                Log.d("Pokey", "nostr:${nPub.nip19raw}")
+                data = Uri.parse("nostr:${nPub.nip19raw}")
             }
         }
         val pendingIntent = PendingIntent.getActivity(

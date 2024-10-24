@@ -12,7 +12,7 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="nostr" /> <!-- Replace with the scheme of the app you want to query -->
+            <data android:scheme="nostr" />
         </intent>
     </queries>
 
