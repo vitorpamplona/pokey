@@ -55,7 +55,6 @@ class NotificationsService : Service() {
         "wss://relay.nsec.app",
         "wss://relay.0xchat.com",
     )
-    private var useDefaultRelays = false
 
     private val timer = Timer()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -200,13 +199,7 @@ class NotificationsService : Service() {
             var latestNotification = dao.getLatestNotification()
             if (latestNotification == null) latestNotification = Instant.now().toEpochMilli() / 1000
 
-            var relays = dao.getRelays()
-            if (relays.isEmpty()) {
-                relays = defaultRelayUrls.map { RelayEntity(id = 0, url = it, kind = 0, createdAt = 0) }
-                useDefaultRelays = true
-            }
-            connectRelays(relays)
-
+            connectRelays()
             Client.sendFilter(
                 subscriptionNotificationId,
                 listOf(
@@ -303,14 +296,13 @@ class NotificationsService : Service() {
             if (lastCreatedRelayAt == null || lastCreatedRelayAt < event.createdAt) {
                 stopSubscription()
                 dao.deleteRelaysByKind(event.kind)
-                val relays = event.tags
+                event.tags
                     .filter { it.size > 1 && (it[0] == "relay" || it[0] == "r") }
                     .map {
                         val entity = RelayEntity(id = 0, url = it[1], kind = event.kind, createdAt = event.createdAt)
                         dao.insertRelay(entity)
                         entity
                     }
-                connectRelays(relays)
                 startSubscription()
             }
         }
@@ -412,25 +404,24 @@ class NotificationsService : Service() {
         return hexKey
     }
 
-    private fun connectRelays(relays: List<RelayEntity>) {
-        Log.d("Pokey", relays.toString())
-        if (useDefaultRelays) {
-            RelayPool.unloadRelays()
-            useDefaultRelays = false
+    private fun connectRelays() {
+        RelayPool.unloadRelays()
+        val dao = AppDatabase.getDatabase(this@NotificationsService, getHexKey()).applicationDao()
+        var relays = dao.getRelays()
+        if (relays.isEmpty()) {
+            relays = defaultRelayUrls.map { RelayEntity(id = 0, url = it, kind = 0, createdAt = 0) }
         }
         relays.forEach {
-            if (RelayPool.getRelays(it.url).isEmpty()) {
-                Client.sendFilterOnlyIfDisconnected()
-                RelayPool.addRelay(
-                    Relay(
-                        it.url,
-                        read = true,
-                        write = false,
-                        forceProxy = false,
-                        activeTypes = COMMON_FEED_TYPES,
-                    ),
-                )
-            }
+            Client.sendFilterOnlyIfDisconnected()
+            RelayPool.addRelay(
+                Relay(
+                    it.url,
+                    read = true,
+                    write = false,
+                    forceProxy = false,
+                    activeTypes = COMMON_FEED_TYPES,
+                ),
+            )
         }
     }
 }
