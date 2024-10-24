@@ -30,7 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
                     Room.databaseBuilder(
                         context,
                         AppDatabase::class.java,
-                        "amber_db_$pubKey",
+                        "pokey_db_$pubKey",
                     )
                         .build()
                 instance

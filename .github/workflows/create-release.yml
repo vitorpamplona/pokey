@@ -59,13 +59,13 @@ jobs:
           draft: false
           prerelease: ${{ steps.regex-match.outputs.match != '' }}
 
-      - name: Upload Free APK Universal Asset
-        id: upload-free-release-asset-universal-apk
+      - name: Upload APK Universal Asset
+        id: upload-release-asset-universal-apk
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: amber-fdroid-universal-${{ github.ref_name }}.apk
+          asset_name: pokey-universal-${{ github.ref_name }}.apk
           asset_content_type: application/zip
