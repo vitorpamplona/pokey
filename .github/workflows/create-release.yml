@@ -68,7 +68,7 @@ jobs:
         id: set_asset_name
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "::set-output asset_name=tag::$TAG_NAME"
+          echo "::set-output name=asset_name::$TAG_NAME"
 
       - name: Upload APK Universal Asset
         id: upload-release-asset-universal-apk
@@ -87,7 +87,7 @@ jobs:
           LATEST_RELEASE=$(curl -s https://api.github.com/repos/zapstore/zapstore-cli/releases/latest)
           TAG_NAME=$(echo $LATEST_RELEASE | jq -r .tag_name)
           echo "Latest release tag: $TAG_NAME"
-          echo "::set-output zapstore_version=tag::$TAG_NAME"
+          echo "::set-output name=zapstore_version::$TAG_NAME"
 
       - name: Publish to Zap.Store
         id: publish-zap-store
