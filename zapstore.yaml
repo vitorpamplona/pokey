@@ -4,5 +4,6 @@ pokey:
     name: Pokey
     description: Nostr pull notifications on Android. Receive live notification on your events and allow other app the receive and interact with them.
     repository: https://github.com/koalasat/pokey
+    license: MIT
     artifacts:
-      - pokey-arm64-v8a-v%v.apk
+      - pokey-universal-v%v.apk
