@@ -26,6 +26,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install Build tools
+        run: sdkmanager "build-tools:34.0.0"
+
+        run: |
+          wget "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool"
+          wget "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.4.1.jar"
+          mv apktool_2.4.1.jar apktool.jar
+          sudo cp apktool /usr/local/bin
+          sudo cp apktool.jar /usr/local/bin
+          sudo chmod +x /usr/local/bin/apktool
+          sudo chmod +x /usr/local/bin/apktool.jar
+
       - name: Install Apktool
         run: |
           wget "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool"
@@ -59,7 +71,6 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
-          # override default build-tools version (29.0.3) -- optional
           BUILD_TOOLS_VERSION: "34.0.0"
 
       - uses: kaisugi/action-regex-match@v1.0.1
@@ -118,7 +129,7 @@ jobs:
           dart pub get
           dart compile exe lib/main.dart -o build
           cd $GITHUB_WORKSPACE
-          ./zapstore-cli/build publish pokey
+          APKSIGNER_PATH=$ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner ./zapstore-cli/build publish pokey
 
 
           
