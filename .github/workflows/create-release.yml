@@ -63,6 +63,12 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: ${{ steps.regex-match.outputs.match != '' }}
+      
+      - name: Set asset_name
+        id: set_asset_name
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "asset_name=pokey-universal-${TAG_NAME}.apk" >> $GITHUB_ENV
 
       - name: Upload APK Universal Asset
         id: upload-release-asset-universal-apk
@@ -72,7 +78,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: pokey-universal-${{ github.ref }}.apk
+          asset_name: ${{ env.asset_name }}
           asset_content_type: application/zip
 
       - name: Get Zap.Store latest release
@@ -86,14 +92,14 @@ jobs:
       - name: Publish to Zap.Store
         id: publish-zap-store
         run: |
-          git clone https://github.com/zapstore/zapstore-cli.git /apps/zapstore
-          cd /apps/zapstore
+          git clone https://github.com/zapstore/zapstore-cli.git
+          cd zapstore
           git fetch --tags
           git checkout ${{ steps.get_latest_release.outputs.tag }}
           dart pub get
           dart compile exe lib/main.dart -o build
           cd $GITHUB_WORKSPACE
-          /apps/zapstore/build publish pokey
+          ./zapstore/build publish pokey
 
 
           
