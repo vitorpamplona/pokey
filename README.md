@@ -8,7 +8,7 @@
 </div>
 <div align="center">
     <a src="https://github.com/ImranR98/Obtainium" target="_blank">
-        <img src="./docs/obtainium.png alt="Get it on Obtaininum" height="70" />
+        <img src="./docs/obtainium.png" alt="Get it on Obtaininum" height="70" />
     </a>
 <!--     <a src="https://github.com/zapstore/zapstore-cli" target="_blank">
         <img src="./docs/obtainium.png alt="Get it on Zap.Store" height="70" />
