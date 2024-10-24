@@ -214,7 +214,7 @@ class NotificationsService : Service() {
                     TypedFilter(
                         types = COMMON_FEED_TYPES,
                         filter = SincePerRelayFilter(
-                            kinds = listOf(1, 4, 13, 9735),
+                            kinds = listOf(1, 4, 6, 7, 13, 9735),
                             tags = mapOf("p" to listOf(hexKey)),
                             since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
                         ),
@@ -338,13 +338,22 @@ class NotificationsService : Service() {
                 title = if (event.content().contains("nostr:$pubKey")) {
                     getString(R.string.new_mention)
                 } else if (event.content().contains("nostr:nevent1")) {
-                    getString(R.string.new_repost)
+                    getString(R.string.new_quote)
                 } else {
                     getString(R.string.new_reply)
                 }
                 text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
+            } else if (event.kind == 6) {
+                title = getString(R.string.new_repost)
             } else if (event.kind == 4 || event.kind == 13) {
                 title = getString(R.string.new_private)
+            } else if (event.kind == 7) {
+                title = getString(R.string.new_reaction)
+                text = if (event.content.isEmpty() || event.content == "+") {
+                    "❤\uFE0F"
+                } else {
+                    event.content
+                }
             } else if (event.kind == 9735) {
                 title = getString(R.string.new_zap)
             }
