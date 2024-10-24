@@ -23,6 +23,22 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Apktool
+        run: |
+          wget "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool"
+          wget "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.4.1.jar"
+          mv apktool_2.4.1.jar apktool.jar
+          sudo cp apktool /usr/local/bin
+          sudo cp apktool.jar /usr/local/bin
+          sudo chmod +x /usr/local/bin/apktool
+          sudo chmod +x /usr/local/bin/apktool.jar
+
+      - name: Verify Apktool Installation
+        run: apktool --version
+
       - name: Cache gradle
         uses: actions/cache@v4
         with:
@@ -94,6 +110,7 @@ jobs:
         env:
           NSEC: ${{ secrets.POKEY_NSEC }}
         run: |
+          mkdir /home/runner/.zapstore
           git clone https://github.com/zapstore/zapstore-cli.git
           cd zapstore-cli
           git fetch --tags
