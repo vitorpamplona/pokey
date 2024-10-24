@@ -11,7 +11,9 @@
     <string name="new_mention">New mention</string>
     <string name="new_reply">New reply</string>
     <string name="new_repost">New repost</string>
+    <string name="new_quote">New quote</string>
     <string name="new_private">New private message</string>
+    <string name="new_reaction">New reaction</string>
     <string name="new_zap">New Zap</string>
     <string name="new_follow">New Follow</string>
     <string name="unknown">Unknown</string>
