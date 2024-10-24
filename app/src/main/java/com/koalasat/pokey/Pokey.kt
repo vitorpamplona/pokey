@@ -1,6 +1,7 @@
 package com.koalasat.pokey
 
 import android.app.Application
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -46,6 +47,8 @@ class Pokey : Application() {
         applicationContext.stopService(intent)
         saveForegroundServicePreference(this, false)
     }
+
+    fun contentResolverFn(): ContentResolver = contentResolver
 
     companion object {
         private val _isEnabled = MutableLiveData(false)
