@@ -27,6 +27,7 @@ import com.vitorpamplona.ammolite.relays.TypedFilter
 import com.vitorpamplona.ammolite.relays.filters.EOSETime
 import com.vitorpamplona.ammolite.relays.filters.SincePerRelayFilter
 import com.vitorpamplona.quartz.encoders.Hex
+import com.vitorpamplona.quartz.encoders.LnInvoiceUtil
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
 import com.vitorpamplona.quartz.encoders.toNote
@@ -334,37 +335,61 @@ class NotificationsService : Service() {
             val pubKey = EncryptedStorage.pubKey
             var nip32Bech32 = ""
 
-            if (event.kind == 1) {
-                title = if (event.content().contains("nostr:$pubKey")) {
-                    getString(R.string.new_mention)
-                } else if (event.content().contains("nostr:nevent1")) {
-                    getString(R.string.new_quote)
-                } else {
-                    getString(R.string.new_reply)
+            when (event.kind) {
+                1 -> {
+                    title = when {
+                        event.content().contains("nostr:$pubKey") -> {
+                            if (!EncryptedStorage.notifyMentions.value!!) return@launch
+                            getString(R.string.new_mention)
+                        }
+                        event.content().contains("nostr:nevent1") -> {
+                            if (!EncryptedStorage.notifyQuotes.value!!) return@launch
+                            getString(R.string.new_quote)
+                        }
+                        else -> {
+                            if (!EncryptedStorage.notifyReplies.value!!) return@launch
+                            getString(R.string.new_reply)
+                        }
+                    }
+                    text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
+                    nip32Bech32 = Hex.decode(event.id).toNote()
                 }
-                text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
-                nip32Bech32 = Hex.decode(event.id).toNote()
-            } else if (event.kind == 6) {
-                title = getString(R.string.new_repost)
-                nip32Bech32 = Hex.decode(event.id).toNote()
-            } else if (event.kind == 4 || event.kind == 13) {
-                title = getString(R.string.new_private)
-                nip32Bech32 = Hex.decode(event.pubKey).toNpub()
-            } else if (event.kind == 7) {
-                title = getString(R.string.new_reaction)
-                text = if (event.content.isEmpty() || event.content == "+") {
-                    "❤\uFE0F"
-                } else {
-                    event.content
+                6 -> {
+                    if (!EncryptedStorage.notifyResposts.value!!) return@launch
+
+                    title = getString(R.string.new_repost)
+                    nip32Bech32 = Hex.decode(event.id).toNote()
                 }
-                val taggedEvent = event.taggedEvents().first()
-                nip32Bech32 = Hex.decode(taggedEvent).toNote()
-            } else if (event.kind == 9735) {
-                title = getString(R.string.new_zap)
-                var sats = event.zapraiserAmount()
-                text = "⚡ $sats Sats"
+                4, 13 -> {
+                    if (!EncryptedStorage.notifyPrivate.value!!) return@launch
+
+                    title = getString(R.string.new_private)
+                    nip32Bech32 = Hex.decode(event.pubKey).toNpub()
+                }
+                7 -> {
+                    if (!EncryptedStorage.notifyReactions.value!!) return@launch
+
+                    title = getString(R.string.new_reaction)
+                    text = if (event.content.isEmpty() || event.content == "+") {
+                        "❤\uFE0F"
+                    } else {
+                        event.content
+                    }
+                    val taggedEvent = event.taggedEvents().first()
+                    nip32Bech32 = Hex.decode(taggedEvent).toNote()
+                }
+                9735 -> {
+                    if (!EncryptedStorage.notifyZaps.value!!) return@launch
+
+                    title = getString(R.string.new_zap)
+                    val bolt11 = event.firstTag("bolt11")
+                    if (!bolt11.isNullOrEmpty()) {
+                        val sats = LnInvoiceUtil.getAmountInSats(bolt11)
+                        text = "⚡ $sats Sats"
+                    }
+                }
             }
-            Log.d("Pokey", nip32Bech32)
+
             if (title.isEmpty()) return@launch
 
             displayNoteNotification(title, text, nip32Bech32, event)
