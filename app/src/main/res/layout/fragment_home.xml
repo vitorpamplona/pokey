@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="68dp"
+        android:padding="16dp"
         android:text="@string/start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -58,9 +59,9 @@
             android:id="@+id/amber"
             android:layout_width="57dp"
             android:layout_height="48dp"
+            android:layout_marginStart="9dp"
             android:drawableTop="@drawable/ic_amber"
             android:drawablePadding="22dp"
-            android:layout_marginStart="9dp"
             android:gravity="center"
             tools:ignore="MissingConstraints" />
 

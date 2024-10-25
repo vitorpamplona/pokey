@@ -26,4 +26,11 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="logo">Logo</string>
+    <string name="active_replies">New replies</string>
+    <string name="active_reactions">New reactions</string>
+    <string name="active_private_messages">New private messages</string>
+    <string name="active_zaps">New zaps</string>
+    <string name="active_quotes">New quotes</string>
+    <string name="active_mentions">New mentions</string>
+    <string name="active_reposts">New reposts</string>
 </resources>

@@ -6,26 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".ui.relays.RelaysFragment">
 
-    <TextView
-        android:id="@+id/title_relays"
-        android:layout_width="412dp"
-        android:layout_height="39dp"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:hint="@string/not_started"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="80dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/relays"
-        android:layout_width="404dp"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_relays" />
+        <TextView
+            android:id="@+id/title_relays"
+            android:layout_width="match_parent"
+            android:layout_height="39dp"
+            android:hint="@string/not_started"
+            android:textAlignment="center"
+            android:textSize="20sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/relays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_relays" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
