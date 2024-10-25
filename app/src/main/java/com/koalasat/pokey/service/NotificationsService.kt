@@ -252,13 +252,18 @@ class NotificationsService : Service() {
             object : TimerTask() {
                 override fun run() {
                     receivedEventsCache.clear()
-                    RelayPool.getAll().forEach {
-                        if (!it.isConnected()) {
-                            Log.d(
-                                "Pokey",
-                                "Relay ${it.url} is not connected, reconnecting...",
-                            )
-                            it.connectAndSendFiltersIfDisconnected()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (RelayPool.getAll().isEmpty()) {
+                            connectRelays()
+                        }
+                        RelayPool.getAll().forEach {
+                            if (!it.isConnected()) {
+                                Log.d(
+                                    "Pokey",
+                                    "Relay ${it.url} is not connected, reconnecting...",
+                                )
+                                it.connectAndSendFiltersIfDisconnected()
+                            }
                         }
                     }
                 }
