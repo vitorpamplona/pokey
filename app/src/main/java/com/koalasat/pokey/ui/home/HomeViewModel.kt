@@ -1,5 +1,6 @@
 package com.koalasat.pokey.ui.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,7 +22,6 @@ class HomeViewModel : ViewModel() {
     init {
         _npubInput.value = EncryptedStorage.pubKey.value
         _serviceStart.value = Pokey.isEnabled.value
-        _validationResult.value = EncryptedStorage.pubKey.value?.isNotEmpty()
         EncryptedStorage.pubKey.observeForever { text ->
             _npubInput.value = text
         }
@@ -39,6 +39,7 @@ class HomeViewModel : ViewModel() {
     fun updateNpubInput(text: String) {
         _npubInput.value = text
         validateNpubInput()
+        Log.e("Pokey", "validation: " + _validationResult.value.toString())
         if (_validationResult.value == true) {
             EncryptedStorage.updatePubKey(text)
         }
@@ -46,10 +47,14 @@ class HomeViewModel : ViewModel() {
 
     private fun validateNpubInput() {
         val parseReturn = uriToRoute(_npubInput.value)
+
         when (parseReturn?.entity) {
             is Nip19Bech32.NPub -> {
                 _validationResult.value = true
+                return
             }
         }
+
+        _validationResult.value = false
     }
 }

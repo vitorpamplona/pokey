@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import com.koalasat.pokey.Pokey
 import com.koalasat.pokey.R
 import com.koalasat.pokey.databinding.FragmentHomeBinding
+import com.koalasat.pokey.models.ExternalSigner
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -30,11 +31,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.npubInput.observe(viewLifecycleOwner) { value ->
-            if (binding.npubInput.text.toString() != value) {
-                binding.npubInput.setText(value)
-            }
-        }
+        val externalSigner = ExternalSigner(this)
 
         binding.npubInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -52,9 +49,16 @@ class HomeFragment : Fragment() {
             } else {
                 if (viewModel.validationResult.value == true) {
                     viewModel.updateServiceStart(true)
+                    binding.npubInput.error = null
                 } else {
                     binding.npubInput.error = getString(R.string.invalid_npub)
                 }
+            }
+        }
+
+        viewModel.npubInput.observe(viewLifecycleOwner) { value ->
+            if (binding.npubInput.text.toString() != value) {
+                binding.npubInput.setText(value)
             }
         }
 
@@ -64,12 +68,20 @@ class HomeFragment : Fragment() {
                 requireContext().theme.resolveAttribute(android.R.attr.colorButtonNormal, typedValue, true)
                 binding.serviceStart.setBackgroundColor(typedValue.data)
                 binding.serviceStart.text = getString(R.string.stop)
+                binding.amber.isEnabled = false
+                binding.npubInput.isEnabled = false
             } else {
                 val typedValue = TypedValue()
                 requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
                 binding.serviceStart.setBackgroundColor(typedValue.data)
                 binding.serviceStart.text = getString(R.string.start)
+                binding.amber.isEnabled = true
+                binding.npubInput.isEnabled = true
             }
+        }
+
+        binding.amber.setOnClickListener {
+            externalSigner.savePubKey()
         }
     }
 
