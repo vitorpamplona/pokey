@@ -24,6 +24,7 @@ import com.vitorpamplona.ammolite.relays.EVENT_FINDER_TYPES
 import com.vitorpamplona.ammolite.relays.Relay
 import com.vitorpamplona.ammolite.relays.RelayPool
 import com.vitorpamplona.ammolite.relays.TypedFilter
+import com.vitorpamplona.ammolite.relays.filters.EOSETime
 import com.vitorpamplona.ammolite.relays.filters.SincePerRelayFilter
 import com.vitorpamplona.quartz.encoders.Hex
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
@@ -210,8 +211,7 @@ class NotificationsService : Service() {
                         types = COMMON_FEED_TYPES,
                         filter = SincePerRelayFilter(
                             tags = mapOf("p" to listOf(hexKey)),
-//                            since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
-                            limit = 1,
+                            since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
                         ),
                     ),
                 ),
