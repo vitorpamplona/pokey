@@ -3,10 +3,12 @@ package com.koalasat.pokey.models
 import android.app.Activity
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.koalasat.pokey.Pokey
+import com.koalasat.pokey.R
 import com.vitorpamplona.quartz.signers.ExternalSignerLauncher
 import com.vitorpamplona.quartz.signers.SignerType
 import java.util.UUID
@@ -20,6 +22,7 @@ class ExternalSigner(fragment: Fragment) {
         nostrSignerLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) {
                 Log.e("Pokey", "ExternalSigner result error: ${result.resultCode}")
+                Toast.makeText(fragment.context, fragment.getString(R.string.amber_not_found), Toast.LENGTH_SHORT).show()
             } else {
                 result.data?.let { externalSignerLauncher.newResult(it) }
             }

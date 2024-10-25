@@ -66,14 +66,12 @@ class HomeFragment : Fragment() {
             if (it) {
                 val typedValue = TypedValue()
                 requireContext().theme.resolveAttribute(android.R.attr.colorButtonNormal, typedValue, true)
-                binding.serviceStart.setBackgroundColor(typedValue.data)
                 binding.serviceStart.text = getString(R.string.stop)
                 binding.amber.isEnabled = false
                 binding.npubInput.isEnabled = false
             } else {
                 val typedValue = TypedValue()
                 requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
-                binding.serviceStart.setBackgroundColor(typedValue.data)
                 binding.serviceStart.text = getString(R.string.start)
                 binding.amber.isEnabled = true
                 binding.npubInput.isEnabled = true

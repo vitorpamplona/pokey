@@ -24,10 +24,12 @@ import com.vitorpamplona.ammolite.relays.EVENT_FINDER_TYPES
 import com.vitorpamplona.ammolite.relays.Relay
 import com.vitorpamplona.ammolite.relays.RelayPool
 import com.vitorpamplona.ammolite.relays.TypedFilter
-import com.vitorpamplona.ammolite.relays.filters.EOSETime
 import com.vitorpamplona.ammolite.relays.filters.SincePerRelayFilter
+import com.vitorpamplona.quartz.encoders.Hex
 import com.vitorpamplona.quartz.encoders.Nip19Bech32
 import com.vitorpamplona.quartz.encoders.Nip19Bech32.uriToRoute
+import com.vitorpamplona.quartz.encoders.toNote
+import com.vitorpamplona.quartz.encoders.toNpub
 import com.vitorpamplona.quartz.events.Event
 import com.vitorpamplona.quartz.events.EventInterface
 import java.time.Instant
@@ -207,9 +209,9 @@ class NotificationsService : Service() {
                     TypedFilter(
                         types = COMMON_FEED_TYPES,
                         filter = SincePerRelayFilter(
-                            kinds = listOf(1, 4, 6, 7, 13, 9735),
                             tags = mapOf("p" to listOf(hexKey)),
-                            since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
+//                            since = RelayPool.getAll().associate { it.url to EOSETime(latestNotification) },
+                            limit = 1,
                         ),
                     ),
                 ),
@@ -330,6 +332,7 @@ class NotificationsService : Service() {
             var title = ""
             var text = ""
             val pubKey = EncryptedStorage.pubKey
+            var nip32Bech32 = ""
 
             if (event.kind == 1) {
                 title = if (event.content().contains("nostr:$pubKey")) {
@@ -340,10 +343,13 @@ class NotificationsService : Service() {
                     getString(R.string.new_reply)
                 }
                 text = event.content().replace(Regex("nostr:[a-zA-Z0-9]+"), "")
+                nip32Bech32 = Hex.decode(event.id).toNote()
             } else if (event.kind == 6) {
                 title = getString(R.string.new_repost)
+                nip32Bech32 = Hex.decode(event.id).toNote()
             } else if (event.kind == 4 || event.kind == 13) {
                 title = getString(R.string.new_private)
+                nip32Bech32 = Hex.decode(event.pubKey).toNpub()
             } else if (event.kind == 7) {
                 title = getString(R.string.new_reaction)
                 text = if (event.content.isEmpty() || event.content == "+") {
@@ -351,28 +357,23 @@ class NotificationsService : Service() {
                 } else {
                     event.content
                 }
+                val taggedEvent = event.taggedEvents().first()
+                nip32Bech32 = Hex.decode(taggedEvent).toNote()
             } else if (event.kind == 9735) {
                 title = getString(R.string.new_zap)
+                var sats = event.zapraiserAmount()
+                text = "⚡ $sats Sats"
             }
-
+            Log.d("Pokey", nip32Bech32)
             if (title.isEmpty()) return@launch
 
-            displayNoteNotification(title, text, event)
+            displayNoteNotification(title, text, nip32Bech32, event)
         }
     }
 
-    private fun displayNoteNotification(title: String, text: String, event: Event) {
+    private fun displayNoteNotification(title: String, text: String, nip32Bech32: String, event: Event) {
         val deepLinkIntent = Intent(Intent.ACTION_VIEW).apply {
-//            val nPub = Nip19Bech32.parseComponents(
-//                "npub",
-//                event.pubKey,
-//                null,
-//            )
-
-//            if (nPub != null) {
-//                data = Uri.parse("nostr:${nPub.nip19raw}")
-//            }
-            data = Uri.parse("nostr:")
+            data = Uri.parse("nostr:$nip32Bech32")
         }
         val pendingIntent = PendingIntent.getActivity(
             this@NotificationsService,
