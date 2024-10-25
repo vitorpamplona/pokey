@@ -1,6 +1,5 @@
 package com.koalasat.pokey.ui.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -39,7 +38,6 @@ class HomeViewModel : ViewModel() {
     fun updateNpubInput(text: String) {
         _npubInput.value = text
         validateNpubInput()
-        Log.e("Pokey", "validation: " + _validationResult.value.toString())
         if (_validationResult.value == true) {
             EncryptedStorage.updatePubKey(text)
         }
